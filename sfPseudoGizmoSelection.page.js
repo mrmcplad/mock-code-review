@@ -22,13 +22,15 @@
    });
 
    /** Imports **/
-   Gizmo.$inject = ["$state", "sfPseudoNewPackageService", "sfPseudoPackagesService", "sfOpenDocumentService"];
+   Gizmo.$inject = ["$state", "sfPseudoNewPackageService", "sfPseudoPackagesService", "sfPseudoGizmoService", "sfOpenDocumentService"];
 
    /** Class / Controller **/
-   function Gizmo ($state, sfPseudoNewPackageService, sfPseudoPackagesService, sfOpenDocumentService) {
+   function Gizmo ($state, sfPseudoNewPackageService, sfPseudoPackagesService, sfOpenDocumentService, sfPseudoGizmoService) {
       var $ctrl = this;
 
       /** Private Variables **/
+      // Randomized List (the list has been randomized)
+      this._RL = false;
 
       /** Public Variables **/
       $ctrl.newPackage = [];
@@ -43,6 +45,8 @@
       $ctrl.cancel = cancel;
 
       /**  Private Methods  **/
+      $ctrl.randomizeGizmos = randomizeGizmos;
+      $ctrl._verifyPseudoID = _verifyPseudoID;
 
       /**  Implementation **/
 
@@ -60,6 +64,17 @@
         }
       }
 
+      function randomizeGizmos(pseudoID) {
+        // if pseudoID is verified:
+        if ($ctrl._verifyPseudoID(pseudoID)) {
+          // call randomizeGizmos on the service
+          sfPseudoGizmoService.randomizeGizmos(pseudoID).then(
+            // after it's done, then set _RL to true
+            $ctrl._RL = true;
+          );
+        }
+      }
+
       function addGizmo() {
         return sfPseudoPackagesService.addGizmo(
           $ctrl.newPackage.packageID,
@@ -72,6 +87,10 @@
 
       function cancel() {
         $state.go('pseudo.package-list');
+      }
+
+      function _verifyPseudoID(pseudoID) {
+        sfPseudoGizmoService.isValid(pseudoID);
       }
    }
 })();

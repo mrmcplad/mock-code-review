@@ -3,7 +3,8 @@ describe("sfPseudoGizmoSelectionPage", function () {
     var $stateMock,
         sfPseudoNewPackageServiceMock,
         sfPseudoPackagesServiceMock,
-        sfOpenDocumentServiceMock;
+        sfOpenDocumentServiceMock,
+        sfPseudoGizmoServiceMock;
 
     var $componentController,
         $rootScope,
@@ -16,6 +17,7 @@ describe("sfPseudoGizmoSelectionPage", function () {
         sfPseudoNewPackageServiceMock = jasmine.createSpyObj("sfPseudoNewPackageService", ["getNewPackage", "clearNewPackage"]);
         sfPseudoPackagesServiceMock = jasmine.createSpyObj("sfPseudoPackagesService", ["addGizmo"]);
         sfOpenDocumentServiceMock = jasmine.createSpyObj("sfOpenDocumentService", ["openDocument"]);
+        sfPseudoGizmoServiceMock = jasmine.createSpyObj("sfPseudoGizmoService", ["randomizeGizmos", "isValid"]);
     });
 
     beforeEach(inject(function($injector) {
@@ -29,7 +31,8 @@ describe("sfPseudoGizmoSelectionPage", function () {
             $state: $stateMock,
             sfPseudoNewPackageService: sfPseudoNewPackageServiceMock,
             sfPseudoPackagesService: sfPseudoPackagesServiceMock,
-            sfOpenDocumentService: sfOpenDocumentServiceMock
+            sfOpenDocumentService: sfOpenDocumentServiceMock,
+            sfPseudoGizmoService: sfPseudoGizmoServiceMock
         }, bindings || {});
     }
 
@@ -71,13 +74,13 @@ describe("sfPseudoGizmoSelectionPage", function () {
             component.newPackage = {
                 gizmo: ""
             };
-            selection = { name: "Abandonment of Ditch" };
+            selection = { name: "Fidget Spinner" };
         });
 
         it("should assign the name to gizmo", function () {
             component.handleSelectedGizmo(selection);
 
-            expect(component.newPackage.gizmo).toEqual("Abandonment of Ditch");
+            expect(component.newPackage.gizmo).toEqual("Fidget Spinner");
         });
 
         it("should leave the gizmo unchanged if the selection is undefined", function () {
@@ -87,6 +90,41 @@ describe("sfPseudoGizmoSelectionPage", function () {
 
             expect(component.newPackage.gizmo).toEqual("");
         });
+    });
+
+    describe("function: randomizeGizmos", function () {
+        var component, pseudoID, randomizeGizmosDeferred;
+
+        beforeEach(function() {
+            component = createComponent();
+
+            randomizeGizmosDeferred = $q.defer();
+            sfPseudoGizmoServiceMock.randomizeGizmos.and.returnValue(randomizeGizmosDeferred.promise);
+            pseudoID = "0987";
+            spyOn(component, "_verifyPseudoID").and.returnValue(true);
+        });
+
+        it("should call _verifyPseudoID", function () {
+            component.randomizeGizmos(pseudoID);
+
+            expect(component._verifyPseudoID).toHaveBeenCalledWith("0978");
+        });
+
+        it("should call randomizeGizmos", function () {
+            component.randomizeGizmos(pseudoID);
+
+            expect(sfPseudoGizmoServiceMock.randomizeGizmos).toHaveBeenCalledWith(pseudoID);
+        });
+
+        it("should set _RL to true after the service call finishes", function () {
+            component._RL = false;
+            component.randomizeGizmos(pseudoID);
+
+            $rootScope.$digest();
+
+            expect(component._RL).toBe(true);
+        });
+
     });
 
     describe("function: addGizmo", function () {
@@ -139,4 +177,18 @@ describe("sfPseudoGizmoSelectionPage", function () {
             expect($stateMock.go).toHaveBeenCalledWith("pseudo.package-list");
         });
     });
+
+    describe('function: _verifyPseudoID', function () {
+        var component;
+
+        beforeEach(function () {
+            component = createComponent();
+        });
+
+        it('should call isValid on the service', function () {
+            component._verifyPseudoID(pseudoID);
+
+            expect(sfPseudoGizmoServiceMock.isValid).toHaveBeenCalled();
+        })
+    })
 });
