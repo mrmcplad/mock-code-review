@@ -1,0 +1,19 @@
+<div class="sf-pseudo-gizmo-selection-page-controller">
+    <div class="row">
+        <div class="col-md-12 margin-bottom">
+            <sf-pseudo-gizmo-selector
+                    name="gizmo-selector"
+                    on-select="$ctrl.handleSelectedGizmo($selection)"
+                    pseudo-id="$ctrl.newPackage.pseudoID"
+                    is-required="true"
+                    sf-focus=".sf-select">
+            </sf-pseudo-gizmo-selector>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 margin-bottom">
+            <input type="button" class="btn btn-default" ng-click="$ctrl.addGizmo()" value="OK"/>
+            <input type="button" class="btn btn-default" ng-click="$ctrl.cancel()" value="Cancel"/>
+        </div>
+    </div>
+</div>
